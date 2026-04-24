@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRUCE — CART</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #fff; font-family: 'Inter', Arial, sans-serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .btn-red { background: #FF0000; color: #fff; border: 2px solid #FF0000; transition: background .2s, color .2s; cursor: pointer; }
+    .btn-red:hover { background: transparent; color: #FF0000; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid #fff; transition: background .2s, color .2s; cursor: pointer; }
+    .btn-outline:hover { background: #fff; color: #0a0a0a; }
+    .cart-item { animation: fadeIn .3s ease; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #FF0000; }
+  </style>
+</head>
+<body>
+
+<nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/10" style="background: rgba(10,10,10,.95); backdrop-filter: blur(10px);">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="/frontend/index.html" class="text-2xl font-black tracking-[.2em] uppercase">DRUCE</a>
+    <div id="auth-area"></div>
+  </div>
+</nav>
+
+<div class="pt-16 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 py-12">
+
+    <div class="mb-10">
+      <p class="text-red text-xs font-black tracking-[.4em] uppercase mb-2">Your</p>
+      <h1 class="text-5xl font-black uppercase tracking-tight">BAG</h1>
+    </div>
+
+    <!-- Loading -->
+    <div id="cart-loading" class="flex flex-col gap-4">
+      <div class="h-24 bg-white/5 animate-pulse"></div>
+      <div class="h-24 bg-white/5 animate-pulse"></div>
+    </div>
+
+    <!-- Empty -->
+    <div id="cart-empty" class="hidden text-center py-32">
+      <p class="text-white/10 text-8xl font-black uppercase mb-4">EMPTY</p>
+      <p class="text-white/30 text-xs font-bold tracking-widest uppercase mb-8">Your bag is empty</p>
+      <a href="/frontend/index.html" class="btn-red px-8 py-3 text-xs font-black tracking-widest uppercase inline-block">SHOP NOW</a>
+    </div>
+
+    <!-- Cart content -->
+    <div id="cart-content" class="hidden grid lg:grid-cols-3 gap-12">
+
+      <!-- Items -->
+      <div class="lg:col-span-2">
+        <div id="cart-items" class="flex flex-col divide-y divide-white/10"></div>
+      </div>
+
+      <!-- Summary -->
+      <div class="lg:col-span-1">
+        <div class="border border-white/10 p-6 sticky top-24">
+          <p class="text-xs font-black tracking-[.3em] uppercase text-white/40 mb-6">Order Summary</p>
+
+          <div class="flex flex-col gap-3 mb-6">
+            <div class="flex justify-between">
+              <span class="text-xs font-bold tracking-widest uppercase text-white/40">Subtotal</span>
+              <span id="subtotal" class="text-xs font-black tracking-widest uppercase">£0.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs font-bold tracking-widest uppercase text-white/40">Shipping</span>
+              <span class="text-xs font-black tracking-widest uppercase text-green-400">FREE</span>
+            </div>
+          </div>
+
+          <div class="flex justify-between border-t border-white/10 pt-4 mb-6">
+            <span class="text-sm font-black tracking-widest uppercase">Total</span>
+            <span id="total" class="text-sm font-black tracking-widest uppercase text-red-500" style="color:#FF0000">£0.00</span>
+          </div>
+
+          <button id="checkout-btn" class="btn-red w-full py-4 text-xs font-black tracking-widest uppercase mb-3">CHECKOUT</button>
+          <button id="clear-btn" class="btn-outline w-full py-3 text-xs font-black tracking-widest uppercase">CLEAR BAG</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/frontend/js/api.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    renderAuthArea();
+    if (!Auth.isLoggedIn()) {
+      window.location.href = '/frontend/auth.html';
+      return;
+    }
+    loadCart();
+  });
+
+  function renderAuthArea() {
+    const area = document.getElementById('auth-area');
+    if (Auth.isLoggedIn()) {
+      area.innerHTML = `<button onclick="api.auth.logout()" class="text-xs font-black tracking-widest uppercase text-white/30 hover:text-red transition-colors" style="color:rgba(255,255,255,.3)">EXIT</button>`;
+    }
+  }
+
+  async function loadCart() {
+    try {
+      const cart = await api.cart.get();
+      document.getElementById('cart-loading').style.display = 'none';
+
+      if (!cart.items || cart.items.length === 0) {
+        document.getElementById('cart-empty').classList.remove('hidden');
+        return;
+      }
+
+      document.getElementById('cart-content').classList.remove('hidden');
+      document.getElementById('cart-content').style.display = 'grid';
+      renderCartItems(cart);
+    } catch {
+      window.location.href = '/frontend/auth.html';
+    }
+  }
+
+  function renderCartItems(cart) {
+    const container = document.getElementById('cart-items');
+    container.innerHTML = '';
+
+    cart.items.forEach(item => {
+      const p = item.product;
+      const row = document.createElement('div');
+      row.className = 'cart-item flex gap-4 py-6';
+      row.id = `item-${p.id}`;
+
+      row.innerHTML = `
+        <a href="/frontend/product.html?id=${p.id}" class="w-20 h-24 bg-[#111] flex-shrink-0 overflow-hidden block">
+          ${p.image_url
+            ? `<img src="${imageUrl(p.image_url)}" alt="${p.name}" class="w-full h-full object-cover" />`
+            : `<div class="w-full h-full flex items-center justify-center"><span class="text-white/10 text-2xl font-black">${p.name[0]}</span></div>`
+          }
+        </a>
+        <div class="flex-1 flex flex-col justify-between">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-sm font-black uppercase tracking-tight mb-1">${p.name}</p>
+              <p class="text-xs text-white/30 font-bold tracking-widest uppercase">${formatPrice(p.price)} each</p>
+            </div>
+            <button onclick="removeItem(${p.id})" class="text-white/20 hover:text-red transition-colors ml-4" style="hover:color:#FF0000">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center border border-white/20">
+              <button onclick="updateQty(${p.id}, ${item.quantity - 1})" class="w-8 h-8 text-white/40 hover:text-white transition-colors text-sm font-black">−</button>
+              <span class="w-8 h-8 flex items-center justify-center text-xs font-black">${item.quantity}</span>
+              <button onclick="updateQty(${p.id}, ${item.quantity + 1})" class="w-8 h-8 text-white/40 hover:text-white transition-colors text-sm font-black">+</button>
+            </div>
+            <p class="text-sm font-black" style="color:#FF0000">${formatPrice(Number(p.price) * item.quantity)}</p>
+          </div>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+
+    document.getElementById('subtotal').textContent = formatPrice(cart.total_price);
+    document.getElementById('total').textContent = formatPrice(cart.total_price);
+  }
+
+  async function removeItem(productId) {
+    try {
+      await api.cart.removeItem(productId);
+      showToast('Item removed');
+      loadCart();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
+  async function updateQty(productId, newQty) {
+    if (newQty < 1) { removeItem(productId); return; }
+    try {
+      await api.cart.updateItem(productId, newQty);
+      loadCart();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
+  document.getElementById('clear-btn').addEventListener('click', async () => {
+    try {
+      await api.cart.clear();
+      loadCart();
+      showToast('Bag cleared');
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  });
+
+  document.getElementById('checkout-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('checkout-btn');
+    btn.textContent = 'PROCESSING...';
+    btn.disabled = true;
+    try {
+      const order = await api.orders.checkout();
+      showToast(`Order #${order.id} placed!`);
+      setTimeout(() => window.location.href = '/frontend/profile.html', 1500);
+    } catch (e) {
+      showToast(e.message, 'error');
+      btn.textContent = 'CHECKOUT';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

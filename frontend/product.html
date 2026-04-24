@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRUCE — Product</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #fff; font-family: 'Inter', Arial, sans-serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .btn-red { background: #FF0000; color: #fff; border: 2px solid #FF0000; transition: background .2s, color .2s; cursor: pointer; }
+    .btn-red:hover { background: transparent; color: #FF0000; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid #fff; transition: background .2s, color .2s; cursor: pointer; }
+    .btn-outline:hover { background: #fff; color: #0a0a0a; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #FF0000; }
+  </style>
+</head>
+<body>
+
+<nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/10" style="background: rgba(10,10,10,.95); backdrop-filter: blur(10px);">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="/frontend/index.html" class="text-2xl font-black tracking-[.2em] uppercase">DRUCE</a>
+    <div class="flex items-center gap-5">
+      <a href="/frontend/cart.html" class="relative text-white/70 hover:text-white transition-colors">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span id="cart-badge" class="hidden absolute -top-2 -right-2 w-4 h-4 bg-[#FF0000] text-white text-[10px] font-black rounded-full items-center justify-center">0</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="pt-16">
+  <!-- Breadcrumb -->
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <a href="/frontend/index.html" class="text-white/30 text-xs font-bold tracking-widest uppercase hover:text-white transition-colors">← BACK TO SHOP</a>
+  </div>
+
+  <!-- Product -->
+  <div id="product-container" class="max-w-7xl mx-auto px-4 pb-24">
+    <div class="grid md:grid-cols-2 gap-12 lg:gap-20" style="animation: fadeIn .5s ease">
+
+      <!-- Image -->
+      <div class="bg-[#111] aspect-[3/4] overflow-hidden relative">
+        <div id="product-img-wrap" class="w-full h-full"></div>
+        <div id="stock-badge" class="hidden absolute top-4 left-4"></div>
+      </div>
+
+      <!-- Info -->
+      <div class="flex flex-col justify-center">
+        <p id="product-category" class="text-red text-xs font-black tracking-[.4em] uppercase mb-3"></p>
+        <h1 id="product-name" class="text-4xl md:text-5xl font-black uppercase tracking-tight mb-4"></h1>
+        <p id="product-price" class="text-3xl font-black text-white mb-6"></p>
+        <p id="product-description" class="text-white/40 text-sm leading-relaxed mb-8"></p>
+
+        <div class="flex items-center gap-3 mb-6">
+          <p class="text-xs font-black tracking-widest uppercase text-white/40">QTY</p>
+          <div class="flex items-center border border-white/20">
+            <button id="qty-minus" class="w-10 h-10 text-white/60 hover:text-white transition-colors text-lg font-black">−</button>
+            <span id="qty-display" class="w-10 h-10 flex items-center justify-center text-sm font-black">1</span>
+            <button id="qty-plus" class="w-10 h-10 text-white/60 hover:text-white transition-colors text-lg font-black">+</button>
+          </div>
+          <p id="stock-info" class="text-xs font-bold tracking-widest uppercase text-white/30"></p>
+        </div>
+
+        <button id="add-to-cart-btn" class="btn-red px-8 py-4 text-xs font-black tracking-widest uppercase w-full md:w-auto">ADD TO CART</button>
+
+        <!-- Meta -->
+        <div class="mt-10 pt-8 border-t border-white/10 flex flex-col gap-3">
+          <div class="flex justify-between">
+            <span class="text-xs font-black tracking-widest uppercase text-white/30">Rating</span>
+            <span id="product-rating" class="text-xs font-black tracking-widest uppercase text-white/60"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-xs font-black tracking-widest uppercase text-white/30">Stock</span>
+            <span id="product-stock" class="text-xs font-black tracking-widest uppercase text-white/60"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skeleton loader -->
+  <div id="skeleton" class="max-w-7xl mx-auto px-4 pb-24 grid md:grid-cols-2 gap-12">
+    <div class="bg-[#111] aspect-[3/4] animate-pulse"></div>
+    <div class="flex flex-col gap-4 justify-center">
+      <div class="h-4 bg-white/5 w-24 animate-pulse"></div>
+      <div class="h-12 bg-white/5 w-3/4 animate-pulse"></div>
+      <div class="h-8 bg-white/5 w-1/3 animate-pulse"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/frontend/js/api.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const productId = params.get('id');
+  let product = null;
+  let qty = 1;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    updateCartBadge();
+    if (!productId) { window.location.href = '/frontend/index.html'; return; }
+
+    try {
+      product = await api.products.getById(productId);
+      renderProduct(product);
+      document.getElementById('skeleton').style.display = 'none';
+      document.getElementById('product-container').style.display = 'block';
+    } catch {
+      window.location.href = '/frontend/index.html';
+    }
+  });
+
+  document.getElementById('product-container').style.display = 'none';
+
+  function renderProduct(p) {
+    document.title = `DRUCE — ${p.name.toUpperCase()}`;
+
+    if (p.image_url) {
+      document.getElementById('product-img-wrap').innerHTML = `<img src="${imageUrl(p.image_url)}" alt="${p.name}" class="w-full h-full object-cover" />`;
+    } else {
+      document.getElementById('product-img-wrap').innerHTML = `<div class="w-full h-full flex items-center justify-center"><span class="text-white/5 text-[8rem] font-black uppercase">${p.name[0]}</span></div>`;
+    }
+
+    document.getElementById('product-name').textContent = p.name.toUpperCase();
+    document.getElementById('product-price').textContent = formatPrice(p.price);
+    document.getElementById('product-description').textContent = p.description || 'No description available.';
+    document.getElementById('product-rating').textContent = `${Number(p.rating).toFixed(1)} / 5.0`;
+    document.getElementById('product-stock').textContent = p.stock > 0 ? `${p.stock} units` : 'Sold Out';
+
+    if (p.stock === 0) {
+      document.getElementById('add-to-cart-btn').disabled = true;
+      document.getElementById('add-to-cart-btn').textContent = 'SOLD OUT';
+      document.getElementById('add-to-cart-btn').className = 'px-8 py-4 text-xs font-black tracking-widest uppercase w-full md:w-auto border-2 border-white/10 text-white/20 cursor-not-allowed';
+    }
+
+    if (p.stock > 0 && p.stock <= 5) {
+      const badge = document.getElementById('stock-badge');
+      badge.className = 'absolute top-4 left-4 bg-[#FF0000] text-white text-[10px] font-black tracking-widest uppercase px-2 py-1';
+      badge.textContent = 'LOW STOCK';
+      badge.classList.remove('hidden');
+    }
+
+    document.getElementById('stock-info').textContent = p.stock > 0 ? `${p.stock} left` : '';
+    updateQty();
+  }
+
+  function updateQty() {
+    document.getElementById('qty-display').textContent = qty;
+    document.getElementById('qty-minus').disabled = qty <= 1;
+  }
+
+  document.getElementById('qty-minus').addEventListener('click', () => { if (qty > 1) { qty--; updateQty(); } });
+  document.getElementById('qty-plus').addEventListener('click', () => {
+    if (product && qty < product.stock) { qty++; updateQty(); }
+  });
+
+  document.getElementById('add-to-cart-btn').addEventListener('click', async () => {
+    if (!Auth.isLoggedIn()) { window.location.href = '/frontend/auth.html'; return; }
+    try {
+      await api.cart.addItem(parseInt(productId), qty);
+      updateCartBadge();
+      showToast(`${product.name.toUpperCase()} ADDED TO CART`);
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  });
+</script>
+</body>
+</html>

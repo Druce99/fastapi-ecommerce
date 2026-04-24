@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRUCE — PROFILE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #fff; font-family: 'Inter', Arial, sans-serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .order-card { animation: fadeIn .4s ease; border: 1px solid rgba(255,255,255,.08); transition: border-color .2s; }
+    .order-card:hover { border-color: rgba(255,255,255,.2); }
+    .status-pending  { background: rgba(255,255,255,.08); color: rgba(255,255,255,.5); }
+    .status-paid     { background: rgba(74,222,128,.1); color: #4ade80; }
+    .status-shipped  { background: rgba(96,165,250,.1); color: #60a5fa; }
+    .status-delivered{ background: rgba(74,222,128,.15); color: #4ade80; }
+    .status-cancelled{ background: rgba(255,0,0,.1); color: #FF0000; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #FF0000; }
+  </style>
+</head>
+<body>
+
+<nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/10" style="background: rgba(10,10,10,.95); backdrop-filter: blur(10px);">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="/frontend/index.html" class="text-2xl font-black tracking-[.2em] uppercase">DRUCE</a>
+    <div class="flex items-center gap-5">
+      <a href="/frontend/cart.html" class="relative text-white/70 hover:text-white transition-colors">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span id="cart-badge" class="hidden absolute -top-2 -right-2 w-4 h-4 bg-[#FF0000] text-white text-[10px] font-black rounded-full items-center justify-center">0</span>
+      </a>
+      <button onclick="api.auth.logout()" class="text-xs font-black tracking-widest uppercase text-white/30 hover:text-white transition-colors">EXIT</button>
+    </div>
+  </div>
+</nav>
+
+<div class="pt-16 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-12">
+
+    <!-- Header -->
+    <div class="mb-12 pb-8 border-b border-white/10">
+      <p class="text-red text-xs font-black tracking-[.4em] uppercase mb-2" style="color:#FF0000">Members</p>
+      <h1 class="text-5xl font-black uppercase tracking-tight mb-2">PROFILE</h1>
+      <p id="user-email" class="text-white/30 text-xs font-bold tracking-widest uppercase"></p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
+      <div class="border border-white/10 p-6">
+        <p class="text-white/30 text-xs font-bold tracking-widest uppercase mb-2">Total Orders</p>
+        <p id="stat-total" class="text-4xl font-black">—</p>
+      </div>
+      <div class="border border-white/10 p-6">
+        <p class="text-white/30 text-xs font-bold tracking-widest uppercase mb-2">Total Spent</p>
+        <p id="stat-spent" class="text-4xl font-black" style="color:#FF0000">—</p>
+      </div>
+      <div class="border border-white/10 p-6 col-span-2 md:col-span-1">
+        <p class="text-white/30 text-xs font-bold tracking-widest uppercase mb-2">Last Order</p>
+        <p id="stat-last" class="text-sm font-black">—</p>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div>
+      <div class="flex items-center justify-between mb-6">
+        <p class="text-xs font-black tracking-[.3em] uppercase text-white/40">Order History</p>
+      </div>
+
+      <div id="orders-loading" class="flex flex-col gap-4">
+        <div class="h-20 bg-white/5 animate-pulse"></div>
+        <div class="h-20 bg-white/5 animate-pulse"></div>
+        <div class="h-20 bg-white/5 animate-pulse"></div>
+      </div>
+
+      <div id="orders-empty" class="hidden text-center py-20">
+        <p class="text-white/10 text-6xl font-black uppercase mb-4">0</p>
+        <p class="text-white/30 text-xs font-bold tracking-widest uppercase mb-8">No orders yet</p>
+        <a href="/frontend/index.html" class="inline-block px-8 py-3 text-xs font-black tracking-widest uppercase" style="background:#FF0000; color:#fff; border:2px solid #FF0000;">SHOP NOW</a>
+      </div>
+
+      <div id="orders-list" class="hidden flex flex-col gap-4"></div>
+
+      <!-- Pagination -->
+      <div id="pagination" class="hidden flex justify-center gap-4 mt-10">
+        <button id="prev-btn" onclick="changePage(-1)" class="px-6 py-2 text-xs font-black tracking-widest uppercase border border-white/20 text-white/40 hover:border-white hover:text-white transition-colors disabled:opacity-20">← PREV</button>
+        <span id="page-info" class="px-4 py-2 text-xs font-black tracking-widest uppercase text-white/30"></span>
+        <button id="next-btn" onclick="changePage(1)" class="px-6 py-2 text-xs font-black tracking-widest uppercase border border-white/20 text-white/40 hover:border-white hover:text-white transition-colors">NEXT →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div id="order-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" style="background:rgba(0,0,0,.85); backdrop-filter:blur(4px);">
+  <div class="w-full max-w-lg border border-white/20" style="background:#0f0f0f; max-height:80vh; overflow-y:auto;">
+    <div class="flex items-center justify-between p-6 border-b border-white/10">
+      <p id="modal-title" class="text-sm font-black tracking-widest uppercase"></p>
+      <button onclick="closeModal()" class="text-white/30 hover:text-white transition-colors">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="modal-body" class="p-6 flex flex-col gap-4"></div>
+  </div>
+</div>
+
+<script src="/frontend/js/api.js"></script>
+<script>
+  let currentPage = 1;
+  const PAGE_SIZE = 10;
+  let totalOrders = 0;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Auth.isLoggedIn()) { window.location.href = '/frontend/auth.html'; return; }
+    const user = Auth.getUser();
+    if (user) document.getElementById('user-email').textContent = user.email;
+    updateCartBadge();
+    loadOrders();
+  });
+
+  async function loadOrders() {
+    try {
+      const data = await api.orders.getAll(currentPage, PAGE_SIZE);
+      totalOrders = data.total;
+
+      document.getElementById('orders-loading').style.display = 'none';
+
+      if (data.total === 0) {
+        document.getElementById('orders-empty').classList.remove('hidden');
+        return;
+      }
+
+      // Stats
+      const totalSpent = data.items.reduce((s, o) => s + Number(o.total_amount), 0);
+      document.getElementById('stat-total').textContent = data.total;
+      document.getElementById('stat-spent').textContent = formatPrice(totalSpent);
+      if (data.items[0]) {
+        const d = new Date(data.items[0].created_at);
+        document.getElementById('stat-last').textContent = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+
+      document.getElementById('orders-list').classList.remove('hidden');
+      document.getElementById('orders-list').style.display = 'flex';
+      renderOrders(data.items);
+
+      if (data.total > PAGE_SIZE) {
+        document.getElementById('pagination').classList.remove('hidden');
+        document.getElementById('pagination').style.display = 'flex';
+        updatePagination();
+      }
+    } catch (e) {
+      document.getElementById('orders-loading').style.display = 'none';
+    }
+  }
+
+  function renderOrders(orders) {
+    const list = document.getElementById('orders-list');
+    list.innerHTML = '';
+    orders.forEach(order => {
+      const card = document.createElement('div');
+      card.className = 'order-card p-5 cursor-pointer';
+      card.onclick = () => openOrderModal(order);
+
+      const date = new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      const statusClass = `status-${order.status}`;
+
+      card.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-4">
+            <div>
+              <p class="text-sm font-black uppercase tracking-tight">Order #${order.id}</p>
+              <p class="text-xs text-white/30 font-bold tracking-widest uppercase mt-1">${date} · ${order.items.length} item${order.items.length !== 1 ? 's' : ''}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="${statusClass} text-[10px] font-black tracking-widest uppercase px-3 py-1">${order.status.toUpperCase()}</span>
+            <p class="text-sm font-black" style="color:#FF0000">${formatPrice(order.total_amount)}</p>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="text-white/20"><polyline points="9,18 15,12 9,6"/></svg>
+          </div>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function openOrderModal(order) {
+    document.getElementById('modal-title').textContent = `Order #${order.id} — ${order.status.toUpperCase()}`;
+    const body = document.getElementById('modal-body');
+    body.innerHTML = '';
+
+    order.items.forEach(item => {
+      const p = item.product;
+      const row = document.createElement('div');
+      row.className = 'flex gap-4 pb-4 border-b border-white/10';
+      row.innerHTML = `
+        <div class="w-14 h-16 bg-[#111] flex-shrink-0 overflow-hidden">
+          ${p && p.image_url ? `<img src="${imageUrl(p.image_url)}" class="w-full h-full object-cover" />` : `<div class="w-full h-full flex items-center justify-center text-white/10 font-black text-xl">${p ? p.name[0] : '?'}</div>`}
+        </div>
+        <div class="flex-1">
+          <p class="text-xs font-black uppercase tracking-tight mb-1">${p ? p.name : 'Product #' + item.product_id}</p>
+          <p class="text-[10px] text-white/30 font-bold tracking-widest uppercase">Qty: ${item.quantity} · ${formatPrice(item.unit_price)} each</p>
+        </div>
+        <p class="text-xs font-black" style="color:#FF0000">${formatPrice(item.total_price)}</p>
+      `;
+      body.appendChild(row);
+    });
+
+    const total = document.createElement('div');
+    total.className = 'flex justify-between pt-2';
+    total.innerHTML = `<span class="text-xs font-black tracking-widest uppercase text-white/40">Total</span><span class="text-sm font-black" style="color:#FF0000">${formatPrice(order.total_amount)}</span>`;
+    body.appendChild(total);
+
+    document.getElementById('order-modal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('order-modal').classList.add('hidden');
+  }
+
+  document.getElementById('order-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('order-modal')) closeModal();
+  });
+
+  function changePage(dir) {
+    const newPage = currentPage + dir;
+    const maxPage = Math.ceil(totalOrders / PAGE_SIZE);
+    if (newPage < 1 || newPage > maxPage) return;
+    currentPage = newPage;
+    document.getElementById('orders-loading').style.display = 'flex';
+    document.getElementById('orders-list').style.display = 'none';
+    loadOrders();
+  }
+
+  function updatePagination() {
+    const maxPage = Math.ceil(totalOrders / PAGE_SIZE);
+    document.getElementById('page-info').textContent = `${currentPage} / ${maxPage}`;
+    document.getElementById('prev-btn').disabled = currentPage === 1;
+    document.getElementById('next-btn').disabled = currentPage === maxPage;
+  }
+</script>
+</body>
+</html>
