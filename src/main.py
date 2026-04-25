@@ -1,9 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import time
+from uuid import uuid4
 
 from src.api import categories, products, reviews, users, cart, orders
 from src.admin import setup_admin
+from src.core.logger import logger
 
 app = FastAPI(
     title="FastAPI Интернет-магазин",
@@ -17,6 +21,23 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def log_middleware(request: Request, call_next):
+    log_id = str(uuid4())
+    start_time = time.time()
+    with logger.contextualize(log_id=log_id):
+        try:
+            response = await call_next(request)
+            duration = time.time() - start_time
+            if response.status_code in [401, 402, 403, 404]:
+                logger.warning(f"Request to {request.url.path} failed in {duration:.3f}s")
+            else:
+                logger.info(f"Successfully accessed {request.url.path} in {duration:.3f}s")
+        except Exception as ex:
+            logger.error(f"Request to {request.url.path} failed: {ex}")
+            response = JSONResponse(content={"success": False}, status_code=500)
+        return response
 
 app.include_router(categories.router)
 app.include_router(products.router)

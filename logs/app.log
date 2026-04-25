@@ -1,0 +1,6 @@
+2026-04-25T14:13:33.167928+0300 | INFO | 01212406-915b-4eac-9a14-921012ad666f | Successfully accessed / in 0.002s
+2026-04-25T14:13:33.218463+0300 | WARNING | dda80945-2d5f-4de0-a611-91ecd8a6d12d | Request to /favicon.ico failed in 0.001s
+2026-04-25T14:13:40.567713+0300 | INFO | 0f61607c-a480-4469-891c-d7c18622f8fa | Successfully accessed /docs in 0.000s
+2026-04-25T14:13:40.777941+0300 | INFO | 4459ebfa-d8a2-40c2-b349-902cd7692f73 | Successfully accessed /openapi.json in 0.098s
+2026-04-25T14:13:59.329734+0300 | INFO | e2ffb8e6-bfdc-47b5-9041-60c1f9ba95aa | Successfully accessed /products/ in 0.745s
+2026-04-25T14:15:32.380542+0300 | WARNING | 585ca4e5-5ea1-43f4-a171-61267117c7bc | Request to /categories/ failed in 0.004s

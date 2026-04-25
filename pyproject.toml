@@ -10,6 +10,7 @@ dependencies = [
     "bcrypt==4.0.1",
     "fastapi>=0.133.1",
     "greenlet>=3.3.2",
+    "loguru>=0.7.3",
     "passlib>=1.7.4",
     "pydantic-settings>=2.13.1",
     "pydantic[email]>=2.12.5",
