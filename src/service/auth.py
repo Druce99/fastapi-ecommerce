@@ -7,7 +7,8 @@ from src.core.config import settings
 from src.core.security import create_access_token, create_refresh_token, hash_password, verify_password
 from src.models import UserModel
 from src.repository.users import UserRepository
-from src.schemas import RefreshTokenRequest, UserCreate, UserRoleUpdate
+from src.schemas import RefreshTokenRequest, UserCreate, UserRoleUpdate, UserRegisteredSchema
+from src.core.broker import broker
 
 
 class AuthService:
@@ -28,6 +29,10 @@ class AuthService:
             role=user_data.role,
         )
         await self.db.commit()
+        await broker.publish(
+            UserRegisteredSchema(email=user.email),
+            channel="user_registered"
+        )
         return user
 
     async def login(self, form_data: OAuth2PasswordRequestForm) -> dict:

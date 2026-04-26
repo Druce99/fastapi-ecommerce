@@ -5,6 +5,8 @@ from .reviews import CreateReview, Review as ReviewSchema
 from .users import User as UserSchema, UserCreate, UserRoleUpdate
 from .CartItem import Cart as CartSchema, CartItem as CartItemSchema, CartItemCreate, CartItemUpdate
 from .orders import Order as OrderSchema, OrderList as OrderListSchema
+from .messages import OrderCreated as OrderCreatedSchema, UserRegistered as UserRegisteredSchema
+
 __all__ = [
     "RefreshTokenRequest",
     "LoginRequest",
@@ -26,5 +28,7 @@ __all__ = [
     "CartItemCreate",
     "CartItemUpdate",
     "OrderSchema",
-    "OrderListSchema"
+    "OrderListSchema",
+    "OrderCreatedSchema",
+    "UserRegisteredSchema",
 ]

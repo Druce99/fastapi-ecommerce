@@ -9,6 +9,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "bcrypt==4.0.1",
     "fastapi>=0.133.1",
+    "faststream[redis]>=0.6.7",
     "greenlet>=3.3.2",
     "loguru>=0.7.3",
     "passlib>=1.7.4",
