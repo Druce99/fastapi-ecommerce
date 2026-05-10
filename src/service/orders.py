@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.repository.cart import CartRepository
 from src.repository.orders import OrderRepository
 from src.models import OrderModel, OrderItemModel
-from src.schemas import OrderSchema, OrderListSchema
+from src.schemas import OrderSchema, OrderListSchema, OrderCreatedSchema
+from src.core.broker import broker
 
 class OrderService:
     def __init__(self, db: AsyncSession) -> None:
@@ -14,7 +15,7 @@ class OrderService:
         self.cart_repo = CartRepository(db)
         self.db = db
     
-    async def checkout(self, user_id: int) -> OrderModel:
+    async def checkout(self, user_id: int, email: str) -> OrderModel:
         cart_items = await self.cart_repo.get_cart_items(user_id=user_id)
         if not cart_items:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cart is empty")
@@ -46,6 +47,12 @@ class OrderService:
         await self.db.commit()
         
         created_order = await self.repo.get_by_id_with_items(order.id)
+        
+        await broker.publish(
+            OrderCreatedSchema(order_id=created_order.id, email=email),
+            channel="order_created"
+        )
+        
         return created_order
     
     async def get_order(self, user_id: int, order_id: int) -> OrderModel:

@@ -4,14 +4,24 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from uuid import uuid4
+from contextlib import asynccontextmanager
 
 from src.api import categories, products, reviews, users, cart, orders
 from src.admin import setup_admin
 from src.core.logger import logger
+from src.core.broker import broker
+import src.tasks.notifications
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await broker.start()
+    yield
+    await broker.stop()
 
 app = FastAPI(
     title="FastAPI Интернет-магазин",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(

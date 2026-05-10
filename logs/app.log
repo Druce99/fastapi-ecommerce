@@ -4,3 +4,70 @@
 2026-04-25T14:13:40.777941+0300 | INFO | 4459ebfa-d8a2-40c2-b349-902cd7692f73 | Successfully accessed /openapi.json in 0.098s
 2026-04-25T14:13:59.329734+0300 | INFO | e2ffb8e6-bfdc-47b5-9041-60c1f9ba95aa | Successfully accessed /products/ in 0.745s
 2026-04-25T14:15:32.380542+0300 | WARNING | 585ca4e5-5ea1-43f4-a171-61267117c7bc | Request to /categories/ failed in 0.004s
+2026-05-10T17:35:55.924555+0300 | INFO | b680a9c4-d297-4cfb-ab17-e573f7739beb | Successfully accessed / in 0.002s
+2026-05-10T17:35:56.042486+0300 | WARNING | 7f191c1c-6215-4ed3-ac60-6ff2c9107b6a | Request to /favicon.ico failed in 0.001s
+2026-05-10T17:36:23.662604+0300 | INFO | 7b1c00be-e394-4331-aea1-65d983c51571 | Successfully accessed /docs in 0.000s
+2026-05-10T17:36:24.282058+0300 | INFO | 7cbb94be-9185-4bea-a2aa-fcf2f4fb9768 | Successfully accessed /openapi.json in 0.091s
+2026-05-10T17:37:01.384025+0300 | INFO | 6a6eb693-2958-44a7-b0d4-e072c0377015 | Successfully accessed /frontend/index.html in 0.097s
+2026-05-10T17:37:01.417531+0300 | INFO | d34fb95d-4203-4429-8310-c067d3bb3207 | Successfully accessed /frontend/js/api.js in 0.004s
+2026-05-10T17:37:02.187652+0300 | INFO | b0cf4be6-b42a-4415-aa02-4be9a388ab4b | Successfully accessed /cart/ in 0.001s
+2026-05-10T17:37:02.189297+0300 | INFO | 26048f8b-6af6-41e7-8ebd-7e947737ba8b | Successfully accessed /categories/ in 0.002s
+2026-05-10T17:37:02.191818+0300 | INFO | 1b399885-3845-4898-b2f9-2403d9422495 | Successfully accessed /products/ in 0.000s
+2026-05-10T17:37:02.232629+0300 | WARNING | 4f10e117-0254-47ec-8978-1a27137a5851 | Request to /cart/ failed in 0.039s
+2026-05-10T17:37:02.264593+0300 | INFO | 719992e3-1469-4c6f-b336-b802e1f8d249 | Successfully accessed /users/access-token in 0.000s
+2026-05-10T17:37:02.272077+0300 | WARNING | c8445060-4e6a-40cb-a18f-bc3b7a88fa82 | Request to /users/access-token failed in 0.004s
+2026-05-10T17:37:02.293725+0300 | INFO | 2b81dedf-a457-4789-b9b6-32a571ff9451 | Successfully accessed /frontend/auth.html in 0.003s
+2026-05-10T17:37:02.562364+0300 | INFO | 20f09e40-1f05-402e-90db-61e688787c6d | Successfully accessed /categories/ in 0.369s
+2026-05-10T17:37:02.568081+0300 | INFO | 2048c557-f562-4cf4-a69f-4bf4e0306ffe | Successfully accessed /products/ in 0.342s
+2026-05-10T17:37:49.343189+0300 | WARNING | 5a41df38-5bdd-4e49-b208-8d2d6c1cbc4f | Request to /users/token failed in 0.022s
+2026-05-10T17:37:55.349398+0300 | WARNING | 5fac7755-17bf-4f50-8135-8730f4e486e7 | Request to /users/token failed in 0.007s
+2026-05-10T17:38:11.964431+0300 | INFO | d61704d8-6837-4750-985d-01648f412616 | Successfully accessed /users/ in 0.000s
+2026-05-10T17:38:12.422693+0300 | INFO | 61d0afec-d27c-4d4d-874f-3b95dc8ead49 | Successfully accessed /users/ in 0.456s
+2026-05-10T17:38:12.685822+0300 | INFO | e063b6ad-7e2d-4a08-b0bc-85aa44517854 | Successfully accessed /users/token in 0.242s
+2026-05-10T17:38:12.836140+0300 | INFO | 5588d037-eec5-4819-a37e-a0525fa3eaa9 | Successfully accessed /categories/ in 0.025s
+2026-05-10T17:38:12.847857+0300 | INFO | dd9b658b-56c6-4044-90be-b09221e7d296 | Successfully accessed /cart/ in 0.041s
+2026-05-10T17:38:12.926387+0300 | INFO | 05d8258c-e6cf-4b45-bd6c-029f8a9fc0e1 | Successfully accessed /products/ in 0.111s
+2026-05-10T17:38:12.940835+0300 | INFO | df44a039-48ca-4838-b999-ca8aadf1f14c | Successfully accessed /media/products/c5b8699a-7cba-48b7-86e3-64d7e95ac09f.webp in 0.004s
+2026-05-10T17:38:12.945664+0300 | INFO | 2b29b687-4aa0-4163-994a-089673f5ef1d | Successfully accessed /media/products/baa150f0-2c68-43d2-8466-af16728ad367.webp in 0.008s
+2026-05-10T17:38:12.947956+0300 | INFO | 789d9a9e-17f0-46e3-8fa9-7ce47ac251f3 | Successfully accessed /media/products/10969013-bb05-4bb8-b62f-2111957fa22f.webp in 0.013s
+2026-05-10T17:38:12.950474+0300 | INFO | d1ad5758-b675-4466-831b-3de8025abe56 | Successfully accessed /media/products/7205c3e8-a1ba-4ee7-879a-adde3c172cd8.webp in 0.010s
+2026-05-10T17:38:12.951705+0300 | INFO | 38d3630f-8f23-4434-b131-ebebd3d6921c | Successfully accessed /media/products/c28a6a68-c709-42f1-b1a7-0c17377f8607.webp in 0.011s
+2026-05-10T17:38:12.952808+0300 | INFO | 85726115-20ab-4875-b23e-36c4658d098b | Successfully accessed /media/products/9d0d6ed7-14a1-484e-a989-c9fd45258d0a.webp in 0.012s
+2026-05-10T17:38:12.977768+0300 | INFO | 454a85e1-2e71-4c3d-8164-339def5e24fc | Successfully accessed /media/products/63a7fca7-161d-416e-8545-533e331fddfe.webp in 0.016s
+2026-05-10T17:38:16.493376+0300 | INFO | 169514f3-f098-4da0-9d7b-a58ea71bdaf8 | Successfully accessed /categories/ in 0.011s
+2026-05-10T17:38:16.500680+0300 | INFO | ae4a3f68-a44e-4ddd-9f35-5fc5740414d3 | Successfully accessed /products/ in 0.018s
+2026-05-10T17:38:16.505028+0300 | INFO | ced6adf5-635d-419b-8dec-bb5de0d69fe8 | Successfully accessed /cart/ in 0.028s
+2026-05-10T17:38:30.496621+0300 | INFO | f79f3b50-6a49-4070-9639-e8121ddce6e7 | Successfully accessed /frontend/product.html in 0.003s
+2026-05-10T17:38:30.637143+0300 | INFO | ce2b241c-1416-4483-9da5-ee9d7e643c7c | Successfully accessed /products/2 in 0.003s
+2026-05-10T17:38:30.638987+0300 | INFO | 9ad730b9-30af-409a-9d35-ae751e58369b | Successfully accessed /cart/ in 0.009s
+2026-05-10T17:38:30.652480+0300 | INFO | 8f090551-d904-4e57-a8b5-2aeeb9f37f31 | Successfully accessed /products/2 in 0.011s
+2026-05-10T17:38:48.254756+0300 | INFO | 910f3828-df38-4309-88e2-e03e904863d8 | Successfully accessed /cart/items in 0.000s
+2026-05-10T17:38:48.294758+0300 | INFO | 64ede303-d7d1-45e9-b887-754705a20dd6 | Successfully accessed /cart/items in 0.037s
+2026-05-10T17:38:48.310894+0300 | INFO | 992b3b13-edef-474f-ba59-1f2d299d719e | Successfully accessed /cart/ in 0.013s
+2026-05-10T17:38:49.817572+0300 | INFO | 1fcb6708-8946-4487-b959-3a98b908d0d6 | Successfully accessed /frontend/cart.html in 0.002s
+2026-05-10T17:38:49.952904+0300 | INFO | 48024490-17fe-45cb-8a6e-5d63cfcaa1c6 | Successfully accessed /cart/ in 0.009s
+2026-05-10T17:38:55.086878+0300 | INFO | 500e7246-df8e-4360-8e3e-4f58d07060ea | Successfully accessed /orders/checkout in 0.000s
+2026-05-10T17:38:55.152784+0300 | INFO | d19ab76c-1513-4e3c-8a28-c657c7d7e7fb | Successfully accessed /orders/checkout in 0.062s
+2026-05-10T17:38:56.675355+0300 | INFO | 09248059-f43e-47f8-a6c0-d536df9b375c | Successfully accessed /frontend/profile.html in 0.003s
+2026-05-10T17:38:56.799651+0300 | INFO | 3c7c96c0-d55a-44dd-afb6-e737ae5de008 | Successfully accessed /orders/ in 0.001s
+2026-05-10T17:38:56.811821+0300 | INFO | a32f0f30-f685-4114-9bbe-e59faf153b49 | Successfully accessed /cart/ in 0.012s
+2026-05-10T17:38:56.828477+0300 | INFO | 0adf44e3-5c33-4291-84d4-236866b42fe3 | Successfully accessed /orders/ in 0.021s
+2026-05-10T17:40:29.276968+0300 | INFO | bb328ba8-4e01-47b3-9347-8e62d8cd6e2c | Successfully accessed /categories/ in 0.015s
+2026-05-10T17:40:29.281868+0300 | INFO | 8b200992-97f3-4944-aedd-1ab945133760 | Successfully accessed /products/ in 0.020s
+2026-05-10T17:40:29.283217+0300 | INFO | 17904fc9-de8f-481f-88f9-88027ba68e42 | Successfully accessed /cart/ in 0.022s
+2026-05-10T17:42:29.682669+0300 | INFO | aedef8cd-765c-4a8b-b302-7b6f3bc4fada | Successfully accessed /frontend/index.html in 0.040s
+2026-05-10T17:42:29.990163+0300 | INFO | 247bbd97-ff61-4a42-b556-6e2f98471f03 | Successfully accessed /categories/ in 0.171s
+2026-05-10T17:42:29.993205+0300 | INFO | 5a403ee4-0e2a-4078-bac7-d0e4aaff19bd | Successfully accessed /products/ in 0.167s
+2026-05-10T17:42:29.998657+0300 | INFO | 094efa3e-7269-41e3-9864-c47186f65455 | Successfully accessed /cart/ in 0.190s
+2026-05-10T17:42:37.054674+0300 | INFO | 8ee03672-fb48-4a8c-947a-cdf81329b807 | Successfully accessed /products/2 in 0.006s
+2026-05-10T17:42:37.069510+0300 | INFO | 477ab521-92a7-4ddc-949a-2f214f7d9e54 | Successfully accessed /cart/ in 0.023s
+2026-05-10T17:42:38.169141+0300 | INFO | fc02482f-6c43-4428-99ee-fb687e23df4c | Successfully accessed /cart/items in 0.026s
+2026-05-10T17:42:38.181701+0300 | INFO | 8323d5f5-f55d-41c6-bdf0-bfb2b7d6c629 | Successfully accessed /cart/ in 0.009s
+2026-05-10T17:42:42.724140+0300 | INFO | deb4c8d2-49eb-4b18-9dfb-f829ecd77229 | Successfully accessed /cart/ in 0.010s
+2026-05-10T17:42:44.454546+0300 | INFO | - | Отправка письма о заказе #3 на solaa07@gmail.com
+2026-05-10T17:42:44.455180+0300 | INFO | e1dea14f-34e1-40f5-858e-5c8b74b58bc2 | Successfully accessed /orders/checkout in 0.044s
+2026-05-10T17:42:46.087559+0300 | INFO | 65972ced-7fda-44f1-8a17-9e7d5c28385b | Successfully accessed /cart/ in 0.011s
+2026-05-10T17:42:46.119718+0300 | INFO | db0eb92f-1e7b-4929-a97a-f272e748e89c | Successfully accessed /orders/ in 0.037s
+2026-05-10T17:42:57.028968+0300 | INFO | e2f9adee-7412-4288-ad43-4344089fe95e | Successfully accessed /cart/ in 0.015s
+2026-05-10T17:42:57.035240+0300 | INFO | 4ce47d26-0ae1-4ccc-99ff-eec2d0619872 | Successfully accessed /categories/ in 0.019s
+2026-05-10T17:42:57.040994+0300 | INFO | 7492cdd5-f02c-4d2f-acf5-334f9726b4ab | Successfully accessed /products/ in 0.025s
