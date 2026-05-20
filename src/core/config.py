@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, env="ACCESS_TOKEN_EXPIRE_MINUTES")
     REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=7, env="REFRESH_TOKEN_EXPIRE_DAYS")
 
+    # ---------- Redis ----------
+    REDIS_URL: str = Field(default="redis://localhost:6379", env="REDIS_URL")
+
     # ---------- Приложение ----------
     APP_NAME: str = Field(default="E-commerce API", env="APP_NAME")
     APP_VERSION: str = Field(default="1.0.0", env="APP_VERSION")
