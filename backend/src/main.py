@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from uuid import uuid4
@@ -57,7 +57,6 @@ app.include_router(cart.router)
 app.include_router(orders.router)
 
 app.mount("/media", StaticFiles(directory="media"), name="media")
-app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 
 setup_admin(app)
 
