@@ -9,7 +9,6 @@ RUN uv sync --frozen --no-dev
 
 COPY src/ ./src/
 COPY alembic.ini ./
-COPY frontend/ ./frontend/
 
 RUN mkdir -p media logs
 
