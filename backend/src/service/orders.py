@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.cart import CartRepository
+from src.repository.products import ProductRepository
 from src.repository.orders import OrderRepository
 from src.models import OrderModel, OrderItemModel
 from src.schemas import OrderSchema, OrderListSchema, OrderCreatedSchema
@@ -19,11 +20,14 @@ class OrderService:
         cart_items = await self.cart_repo.get_cart_items(user_id=user_id)
         if not cart_items:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cart is empty")
+        product_ids = [item.product_id for item in cart_items]
+        products = await ProductRepository(self.db).get_by_ids_for_update(product_ids)
+        product_map = {p.id: p for p in products}
         order = OrderModel(user_id=user_id)
         total_amount = Decimal("0")
         
         for cart_item in cart_items:
-            product = cart_item.product
+            product = product_map.get(cart_item.product_id)
             if not product or not product.is_active:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Product {cart_item.product_id} is unavailable")
             if product.stock < cart_item.quantity:

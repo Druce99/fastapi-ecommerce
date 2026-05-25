@@ -12,6 +12,14 @@ class ProductRepository(BaseRepository[ProductModel]):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(ProductModel, db)
 
+    async def get_by_ids_for_update(self, product_ids: list[int]) -> list[ProductModel]:
+        result = await self.db.scalars(
+            select(self.model)
+            .where(self.model.id.in_(product_ids))
+            .with_for_update()
+        )
+        return result.all()
+
     async def get_by_category(self, category_id: int) -> list[ProductModel]:
         result = await self.db.scalars(
             select(self.model).where(
