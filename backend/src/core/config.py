@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     APP_VERSION: str = Field(default="1.0.0", env="APP_VERSION")
     DEBUG: bool = Field(default=True, env="DEBUG")
 
+    # ---------- S3 ----------
+    S3_BUCKET_NAME: str = Field(default="", env="S3_BUCKET_NAME")
+    S3_ACCESS_KEY: str = Field(default="", env="S3_ACCESS_KEY")
+    S3_SECRET_KEY: str = Field(default="", env="S3_SECRET_KEY")
+    S3_ENDPOINT_URL: str = Field(default="https://storage.yandexcloud.net", env="S3_ENDPOINT_URL")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
