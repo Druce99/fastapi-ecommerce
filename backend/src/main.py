@@ -2,12 +2,14 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 import time
 from uuid import uuid4
 from contextlib import asynccontextmanager
 
 from src.api import categories, products, reviews, users, cart, orders
 from src.admin import setup_admin
+from src.core.config import settings
 from src.core.logger import logger
 from src.core.broker import broker
 import src.tasks.notifications
@@ -24,9 +26,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
