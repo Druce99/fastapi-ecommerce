@@ -35,6 +35,14 @@ class Settings(BaseSettings):
     APP_NAME: str = Field(default="E-commerce API", env="APP_NAME")
     APP_VERSION: str = Field(default="1.0.0", env="APP_VERSION")
     DEBUG: bool = Field(default=True, env="DEBUG")
+    ALLOWED_ORIGINS: list[str] = Field(
+        default=["http://localhost:5173"],
+        env="ALLOWED_ORIGINS",
+    )
+
+    # ---------- Админка ----------
+    ADMIN_USERNAME: str = Field(default="admin", env="ADMIN_USERNAME")
+    ADMIN_PASSWORD: str = Field(default="changeme", env="ADMIN_PASSWORD")
 
     # ---------- S3 ----------
     S3_BUCKET_NAME: str = Field(default="", env="S3_BUCKET_NAME")
