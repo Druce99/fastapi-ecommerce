@@ -1,28 +1,7 @@
 from sqladmin import Admin, ModelView
-from sqladmin.authentication import AuthenticationBackend
-from starlette.requests import Request
-from starlette.responses import RedirectResponse
 
-from src.core.config import settings
 from src.core.database import async_engine
 from src.models import UserModel, ProductModel, CategoryModel, OrderModel, ReviewModel
-
-
-class AdminAuth(AuthenticationBackend):
-    async def login(self, request: Request) -> bool:
-        form = await request.form()
-        if form["username"] == settings.ADMIN_USERNAME and form["password"] == settings.ADMIN_PASSWORD:
-            request.session.update({"admin": True})
-            return True
-        return False
-
-    async def logout(self, request: Request) -> bool:
-        request.session.clear()
-        return True
-
-    async def authenticate(self, request: Request):
-        if not request.session.get("admin"):
-            return RedirectResponse(request.url_for("admin:login"), status_code=302)
 
 
 class UserAdmin(ModelView, model=UserModel):
@@ -76,8 +55,7 @@ class ReviewAdmin(ModelView, model=ReviewModel):
 
 
 def setup_admin(app):
-    auth_backend = AdminAuth(secret_key=settings.SECRET_KEY)
-    admin = Admin(app, engine=async_engine, title="Админ панель", authentication_backend=auth_backend)
+    admin = Admin(app, engine=async_engine, title="Админ панель")
     admin.add_view(UserAdmin)
     admin.add_view(CategoryAdmin)
     admin.add_view(ProductAdmin)
