@@ -1,4 +1,4 @@
 #!/bin/bash
 source .venv/bin/activate
 alembic upgrade head
-exec gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+exec gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --forwarded-allow-ips='*'
