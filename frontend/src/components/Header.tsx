@@ -24,12 +24,12 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="text-lg font-black tracking-tight uppercase">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-4">
+        <Link to="/" className="text-base md:text-lg font-black tracking-tight uppercase shrink-0">
           DrüceShop
         </Link>
 
-        <nav className="flex items-center gap-8">
+        <nav className="flex items-center gap-4 md:gap-8">
           {navLink('/products', 'Каталог')}
 
           <button
