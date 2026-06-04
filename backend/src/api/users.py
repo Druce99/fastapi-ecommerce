@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_async_db
-from src.core.security import get_current_admin
+from src.core.security import get_current_admin, get_current_user
 from src.models import UserModel
 from src.schemas import RefreshTokenRequest, UserCreate, UserRoleUpdate, UserSchema
 from src.service.auth import AuthService
@@ -32,6 +32,14 @@ async def update_user_role(
     admin: UserModel = Depends(get_current_admin),
 ):
     return await AuthService(db).update_role(user_id, role, admin)
+
+
+@router.get("/me", response_model=UserSchema)
+async def get_me(
+    current_user: UserModel = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+):
+    return current_user
 
 
 @router.post("/refresh-token")

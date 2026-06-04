@@ -85,6 +85,8 @@ export default function ProductsPage() {
   const [sort, setSort] = useState<SortOption>('default')
   const [inStock, setInStock] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
   const searchRef = useRef<HTMLInputElement>(null)
   const { toggle, has } = useWishlistStore()
@@ -100,19 +102,22 @@ export default function ProductsPage() {
     if (debouncedMax) params.max_price = debouncedMax
     if (inStock) params.in_stock = true
 
-    const data = await getProducts(1, params)
+    const data = await getProducts(page, params)
     let items = [...data.items]
     if (sort === 'price_asc') items.sort((a, b) => parseFloat(a.price) - parseFloat(b.price))
     if (sort === 'price_desc') items.sort((a, b) => parseFloat(b.price) - parseFloat(a.price))
     setProducts(items)
     setTotal(data.total)
+    setTotalPages(data.pages)
     setFetching(false)
-  }, [search, debouncedMin, debouncedMax, sort, inStock])
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [search, debouncedMin, debouncedMax, sort, inStock, page])
 
   useEffect(() => { fetchProducts() }, [fetchProducts])
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
+    setPage(1)
     setSearch(searchInput)
   }
 
@@ -125,6 +130,7 @@ export default function ProductsPage() {
     setMaxPrice('')
     setInStock(false)
     setSort('default')
+    setPage(1)
   }
 
   return (
@@ -301,6 +307,41 @@ export default function ProductsPage() {
             </div>
           )}
         </div>
+
+        {/* Пагинация */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-16">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 text-xs font-semibold uppercase tracking-widest border border-gray-200 hover:border-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              ←
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={`w-9 h-9 text-xs font-semibold transition-colors ${
+                  p === page
+                    ? 'bg-black text-white'
+                    : 'border border-gray-200 hover:border-black text-gray-700'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-4 py-2 text-xs font-semibold uppercase tracking-widest border border-gray-200 hover:border-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
