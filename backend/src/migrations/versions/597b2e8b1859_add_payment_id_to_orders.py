@@ -20,7 +20,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.add_column('orders', sa.Column('payment_id', sa.String(100), nullable=True))
+    op.add_column('orders', sa.Column('paid_at', sa.DateTime(timezone=True), nullable=True))
 
 
 def downgrade() -> None:
+    op.drop_column('orders', 'paid_at')
     op.drop_column('orders', 'payment_id')

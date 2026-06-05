@@ -8,7 +8,7 @@ import time
 from uuid import uuid4
 from contextlib import asynccontextmanager
 
-from src.api import categories, products, reviews, users, cart, orders
+from src.api import categories, products, reviews, users, cart, orders, payments
 from src.admin import setup_admin
 from src.core.config import settings
 from src.core.logger import logger
@@ -60,6 +60,7 @@ app.include_router(users.router)
 app.include_router(reviews.router)
 app.include_router(cart.router)
 app.include_router(orders.router)
+app.include_router(payments.router)
 
 app.mount("/media", StaticFiles(directory="media"), name="media")
 

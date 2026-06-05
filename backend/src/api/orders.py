@@ -5,6 +5,7 @@ from src.core.database import get_async_db
 from src.core.security import get_current_user
 from src.models import UserModel
 from src.schemas import OrderSchema, OrderListSchema
+from src.schemas.orders import OrderCheckoutResponse
 from src.service.orders import OrderService
 
 router = APIRouter(
@@ -12,7 +13,7 @@ router = APIRouter(
     tags=["orders"]
 )
 
-@router.post("/checkout", response_model=OrderSchema, status_code=status.HTTP_201_CREATED)
+@router.post("/checkout", response_model=OrderCheckoutResponse, status_code=status.HTTP_201_CREATED)
 async def checkout_order(db: AsyncSession = Depends(get_async_db), current_user: UserModel = Depends(get_current_user)):
     return await OrderService(db).checkout(current_user.id, current_user.email)
 
