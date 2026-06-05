@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY: str = Field(default="", env="S3_ACCESS_KEY")
     S3_SECRET_KEY: str = Field(default="", env="S3_SECRET_KEY")
     S3_ENDPOINT_URL: str = Field(default="https://storage.yandexcloud.net", env="S3_ENDPOINT_URL")
+    
+    # ---------- ЮKassa ----------
+    YOOKASSA_SHOP_ID: int = Field(default=0, env="YOOKASSA_SHOP_ID")
+    YOOKASSA_SECRET_KEY: str = Field(default="", env="YOOKASSA_SECRET_KEY")
+    YOOKASSA_RETURN_URL: str = Field(default="https://druceshop.ru", env="YOOKASSA_RETURN_URL")
 
     class Config:
         env_file = ".env"
