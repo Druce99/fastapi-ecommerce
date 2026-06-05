@@ -16,6 +16,8 @@ class OrderItem(BaseModel):
 class Order(BaseModel):
     id: int = Field(..., description="ID позиции заказа")
     user_id: int = Field(..., description="ID пользователя")
+    payment_id: str | None = Field(None, description="ID платежа в ЮKassa")
+    paid_at: datetime | None = Field(None, description="Время оплаты (UTC)")
     status: str = Field(..., description="Текущий статус заказа")
     total_amount: Decimal = Field(..., ge=0, description="Общая стоимость")
     created_at: datetime = Field(..., description="Когда заказ был создан")
@@ -31,3 +33,7 @@ class OrderList(BaseModel):
     page_size: int = Field(ge=1, description="Размер страницы")
     
     model_config = ConfigDict(from_attributes=True)
+
+class OrderCheckoutResponse(BaseModel):
+    order: Order = Field(..., description="Созданный заказ")
+    confirmation_url: str | None = Field(None, description="URL для перехода на оплату YOOKASSA")

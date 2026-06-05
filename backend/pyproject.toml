@@ -24,6 +24,7 @@ dependencies = [
     "sqladmin>=0.25.0",
     "sqlalchemy>=2.0.47",
     "uvicorn[standard]>=0.41.0",
+    "yookassa>=3.10.1",
 ]
 
 [dependency-groups]
