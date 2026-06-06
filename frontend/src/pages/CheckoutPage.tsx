@@ -25,9 +25,14 @@ export default function CheckoutPage() {
     setError('')
     setLoading(true)
     try {
-      await api.post('/orders/checkout')
+      const response = await api.post('/orders/checkout')
+      const confirmationUrl: string | null = response.data?.confirmation_url ?? null
       setCart({ ...cart!, items: [], total_quantity: 0, total_price: '0' })
-      navigate('/account')
+      if (confirmationUrl) {
+        window.location.href = confirmationUrl
+      } else {
+        navigate('/account')
+      }
     } catch {
       setError('Ошибка при оформлении заказа. Попробуйте снова.')
     } finally {

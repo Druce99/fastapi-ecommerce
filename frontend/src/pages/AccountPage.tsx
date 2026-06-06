@@ -9,6 +9,8 @@ interface Order {
   id: number
   status: string
   total_amount: string
+  payment_id: string | null
+  paid_at: string | null
   created_at: string
   items: { quantity: number; product: { name: string; price: string } }[]
 }
@@ -16,18 +18,22 @@ interface Order {
 type Tab = 'orders' | 'wishlist' | 'settings'
 
 const statusLabels: Record<string, string> = {
-  pending: 'Ожидает',
+  pending: 'Ожидает оплаты',
+  paid: 'Оплачен',
   processing: 'В обработке',
   shipped: 'Отправлен',
   delivered: 'Доставлен',
+  canceled: 'Отменён',
   cancelled: 'Отменён',
 }
 
 const statusColors: Record<string, string> = {
   pending: 'text-yellow-500',
+  paid: 'text-green-500',
   processing: 'text-blue-500',
   shipped: 'text-purple-500',
-  delivered: 'text-green-500',
+  delivered: 'text-green-600',
+  canceled: 'text-red-500',
   cancelled: 'text-red-500',
 }
 
