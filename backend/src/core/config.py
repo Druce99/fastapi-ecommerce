@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     # ---------- ЮKassa ----------
     YOOKASSA_SHOP_ID: int = Field(default=0, env="YOOKASSA_SHOP_ID")
     YOOKASSA_SECRET_KEY: str = Field(default="", env="YOOKASSA_SECRET_KEY")
-    YOOKASSA_RETURN_URL: str = Field(default="https://druceshop.ru", env="YOOKASSA_RETURN_URL")
+    YOOKASSA_RETURN_URL: str = Field(default="https://druceshop.ru/account", env="YOOKASSA_RETURN_URL")
 
     class Config:
         env_file = ".env"
