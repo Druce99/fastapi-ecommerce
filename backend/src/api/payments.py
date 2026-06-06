@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timezone
 import json
-from yookassa import WebhookNotification
+from yookassa.domain.notification import WebhookNotification
 from sqlalchemy import select
 from src.models import OrderModel
 
