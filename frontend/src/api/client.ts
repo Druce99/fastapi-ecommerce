@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://druceshop.ru'
+
 const api = axios.create({
-  baseURL: 'https://druceshop.ru',
+  baseURL: API_BASE_URL,
 })
 
 api.interceptors.request.use((config) => {
@@ -13,7 +15,9 @@ api.interceptors.request.use((config) => {
         config.headers['Authorization'] = `Bearer ${token}`
       }
     }
-  } catch {}
+  } catch {
+    // malformed auth payload in localStorage — proceed unauthenticated
+  }
   return config
 })
 
@@ -52,7 +56,7 @@ api.interceptors.response.use(
     isRefreshing = true
 
     try {
-      const res = await axios.post('https://druceshop.ru/users/access-token', {
+      const res = await axios.post(`${API_BASE_URL}/users/access-token`, {
         refresh_token: refreshToken,
       })
       const newToken = res.data.access_token

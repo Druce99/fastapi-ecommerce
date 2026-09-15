@@ -13,7 +13,7 @@ export default function CartDrawer() {
     if (isOpen && token) {
       getCart().then(setCart)
     }
-  }, [isOpen, token])
+  }, [isOpen, token, setCart])
 
   async function handleRemove(productId: number) {
     await removeFromCart(productId)

@@ -53,7 +53,7 @@ export default function AccountPage() {
       setOrders(res.data.items || [])
       setOrdersLoading(false)
     })
-  }, [user])
+  }, [user, navigate])
 
   useEffect(() => {
     if (tab === 'wishlist' && wishlistIds.length > 0) {

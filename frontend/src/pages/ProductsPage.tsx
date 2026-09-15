@@ -103,7 +103,7 @@ export default function ProductsPage() {
     if (inStock) params.in_stock = true
 
     const data = await getProducts(page, params)
-    let items = [...data.items]
+    const items = [...data.items]
     if (sort === 'price_asc') items.sort((a, b) => parseFloat(a.price) - parseFloat(b.price))
     if (sort === 'price_desc') items.sort((a, b) => parseFloat(b.price) - parseFloat(a.price))
     setProducts(items)
@@ -113,6 +113,7 @@ export default function ProductsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [search, debouncedMin, debouncedMax, sort, inStock, page])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch-on-filter-change
   useEffect(() => { fetchProducts() }, [fetchProducts])
 
   function handleSearch(e: React.FormEvent) {
