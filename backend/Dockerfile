@@ -10,7 +10,7 @@ RUN uv sync --frozen --no-dev
 COPY src/ ./src/
 COPY alembic.ini ./
 
-RUN mkdir -p media logs
+RUN mkdir -p logs
 
 COPY entrypoint.sh ./
 RUN sed -i 's/\r//' entrypoint.sh && chmod +x entrypoint.sh

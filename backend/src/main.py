@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
@@ -61,8 +60,6 @@ app.include_router(reviews.router)
 app.include_router(cart.router)
 app.include_router(orders.router)
 app.include_router(payments.router)
-
-app.mount("/media", StaticFiles(directory="media"), name="media")
 
 setup_admin(app)
 
