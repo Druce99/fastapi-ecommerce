@@ -1,7 +1,6 @@
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-
 from src.models import CartItemModel
 
 from .base import BaseRepository
@@ -19,7 +18,7 @@ class CartRepository(BaseRepository[CartItemModel]):
             .where(CartItemModel.user_id == user_id)
             .order_by(CartItemModel.id)
         )
-        return result.all()
+        return list(result.all())
 
     async def get_cart_item(self, user_id: int, product_id: int) -> CartItemModel | None:
         """Получить позицию корзины по пользователю и товару."""
@@ -36,3 +35,4 @@ class CartRepository(BaseRepository[CartItemModel]):
     async def clear_cart(self, user_id: int) -> None:
         """Очистить корзину пользователя."""
         await self.db.execute(delete(CartItemModel).where(CartItemModel.user_id == user_id))
+        await self.db.flush()

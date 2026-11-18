@@ -1,6 +1,5 @@
 from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from src.core.database import Base
 
 
@@ -30,7 +29,5 @@ class User(Base):
         cascade="all, delete-orphan",
     )
     orders: Mapped[list["Order"]] = relationship(
-        "Order",
-        back_populates="user",
-        cascade="all, delete-orphan"
+        "Order", back_populates="user", cascade="all, delete-orphan"
     )

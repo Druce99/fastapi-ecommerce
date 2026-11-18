@@ -1,6 +1,3 @@
-import pytest
-
-
 class TestGetCategories:
     async def test_get_all_categories(self, client):
         resp = await client.get("/categories/")
