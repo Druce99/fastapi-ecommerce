@@ -1,25 +1,23 @@
 from decimal import Decimal
 
-from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.repository.cart import CartRepository
-from src.repository.products import ProductRepository
-from src.schemas import CartItemCreate, CartItemSchema, CartItemUpdate, CartSchema
+from src.core.exceptions import NotFoundError
+from src.models import CartItemModel
+from src.repository.uow import UnitOfWorkFactory
+from src.schemas import CartItemCreate, CartItemUpdate, CartSchema
 
 
 class CartService:
-    def __init__(self, db: AsyncSession) -> None:
-        self.repo = CartRepository(db=db)
-        self.product_repo = ProductRepository(db=db)
-        self.db = db
+    def __init__(self, uow_factory: UnitOfWorkFactory) -> None:
+        self._uow_factory = uow_factory
 
     async def get_cart(self, user_id: int) -> CartSchema:
-        items = await self.repo.get_cart_items(user_id=user_id)
+        async with self._uow_factory() as uow:
+            items = await uow.cart.get_cart_items(user_id=user_id)
+
         total_quantity = sum(item.quantity for item in items)
         price_items = (
-            Decimal(item.quantity) *
-            (item.product.price if item.product.price is not None else Decimal("0"))
+            Decimal(item.quantity)
+            * (item.product.price if item.product.price is not None else Decimal("0"))
             for item in items
         )
         total_price = sum(price_items, Decimal("0.00"))
@@ -31,44 +29,51 @@ class CartService:
             total_price=total_price,
         )
 
-    async def add_item(self, user_id: int, payload: CartItemCreate) -> CartItemSchema:
-        product = await self.product_repo.get_active_by_id(id=payload.product_id)
-        if product is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    async def add_item(self, user_id: int, payload: CartItemCreate) -> CartItemModel:
+        async with self._uow_factory() as uow:
+            product = await uow.products.get_active_by_id(id=payload.product_id)
+            if product is None:
+                raise NotFoundError("Product not found")
 
-        item = await self.repo.get_cart_item(user_id=user_id, product_id=payload.product_id)
-        if item:
-            await self.repo.update(item.id, {"quantity": item.quantity + payload.quantity})
-        else:
-            await self.repo.create(user_id=user_id, **payload.model_dump())
+            item = await uow.cart.get_cart_item(user_id=user_id, product_id=payload.product_id)
+            if item:
+                await uow.cart.update(item.id, {"quantity": item.quantity + payload.quantity})
+            else:
+                await uow.cart.create(user_id=user_id, **payload.model_dump())
+            await uow.commit()
 
-        await self.db.commit()
-
-        updated_item = await self.repo.get_cart_item(user_id=user_id, product_id=payload.product_id)
+            updated_item = await uow.cart.get_cart_item(
+                user_id=user_id, product_id=payload.product_id
+            )
         return updated_item
 
-    async def update_item(self, user_id: int, product_id: int, payload: CartItemUpdate) -> CartItemSchema:
-        product = await self.product_repo.get_active_by_id(id=product_id)
-        if product is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    async def update_item(
+        self, user_id: int, product_id: int, payload: CartItemUpdate
+    ) -> CartItemModel:
+        async with self._uow_factory() as uow:
+            product = await uow.products.get_active_by_id(id=product_id)
+            if product is None:
+                raise NotFoundError("Product not found")
 
-        item = await self.repo.get_cart_item(user_id=user_id, product_id=product_id)
-        if item is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found in cart")
+            item = await uow.cart.get_cart_item(user_id=user_id, product_id=product_id)
+            if item is None:
+                raise NotFoundError("Product not found in cart")
 
-        await self.repo.update(id=item.id, update_data={"quantity": payload.quantity})
-        await self.db.commit()
+            await uow.cart.update(id=item.id, update_data={"quantity": payload.quantity})
+            await uow.commit()
 
-        item = await self.repo.get_cart_item(user_id=user_id, product_id=product_id)
-        return item
+            updated_item = await uow.cart.get_cart_item(user_id=user_id, product_id=product_id)
+        return updated_item
 
     async def remove_item(self, user_id: int, product_id: int) -> None:
-        item = await self.repo.get_cart_item(user_id=user_id, product_id=product_id)
-        if item is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found in cart")
-        await self.repo.delete_physical(id=item.id)
-        await self.db.commit()
+        async with self._uow_factory() as uow:
+            item = await uow.cart.get_cart_item(user_id=user_id, product_id=product_id)
+            if item is None:
+                raise NotFoundError("Product not found in cart")
+            await uow.cart.delete_physical(id=item.id)
+            await uow.commit()
 
     async def clear_cart(self, user_id: int) -> None:
-        await self.repo.clear_cart(user_id=user_id)
-        await self.db.commit()
+        async with self._uow_factory() as uow:
+            await uow.cart.clear_cart(user_id=user_id)
+            await uow.commit()

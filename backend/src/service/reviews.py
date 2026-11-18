@@ -1,56 +1,50 @@
-from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
+from src.core.exceptions import BusinessRuleError, NotFoundError, PermissionDeniedError
 from src.models import ReviewModel, UserModel
-from src.repository.products import ProductRepository
-from src.repository.reviews import ReviewRepository
+from src.repository.uow import AbstractUnitOfWork, UnitOfWorkFactory
 from src.schemas import CreateReview
 
 
 class ReviewService:
-    def __init__(self, db: AsyncSession) -> None:
-        self.repo = ReviewRepository(db)
-        self.product_repo = ProductRepository(db)
-        self.db = db
+    def __init__(self, uow_factory: UnitOfWorkFactory) -> None:
+        self._uow_factory = uow_factory
 
     async def get_all(self) -> list[ReviewModel]:
-        return await self.repo.get_all_reviews()
+        async with self._uow_factory() as uow:
+            return await uow.reviews.get_all_reviews()
 
     async def create(self, review_data: CreateReview, current_user: UserModel) -> ReviewModel:
-        product = await self.product_repo.get_active_by_id(review_data.product_id)
-        if not product:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Product not found",
-            )
+        async with self._uow_factory() as uow:
+            product = await uow.products.get_active_by_id(review_data.product_id)
+            if not product:
+                raise NotFoundError("Product not found")
 
-        existing = await self.repo.get_by_user_and_product(current_user.id, review_data.product_id)
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You have already reviewed this product",
+            existing = await uow.reviews.get_by_user_and_product(
+                current_user.id, review_data.product_id
             )
+            if existing:
+                raise BusinessRuleError("You have already reviewed this product")
 
-        review = await self.repo.create(**review_data.model_dump(), user_id=current_user.id)
-        await self.repo.update_product_rating(product.id)
-        await self.db.commit()
+            review = await uow.reviews.create(**review_data.model_dump(), user_id=current_user.id)
+            await self._refresh_product_rating(uow, product.id)
+            await uow.commit()
         return review
 
     async def delete(self, review_id: int, current_user: UserModel) -> dict:
-        review = await self.repo.get_active_by_id(review_id)
-        if not review:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Review not found",
-            )
-        if current_user.id != review.user_id and current_user.role != "admin":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You can only delete your own reviews",
-            )
+        async with self._uow_factory() as uow:
+            review = await uow.reviews.get_active_by_id(review_id)
+            if not review:
+                raise NotFoundError("Review not found")
+            if current_user.id != review.user_id and current_user.role != "admin":
+                raise PermissionDeniedError("You can only delete your own reviews")
 
-        product_id = review.product_id
-        await self.repo.delete_logical(review_id)
-        await self.repo.update_product_rating(product_id)
-        await self.db.commit()
+            product_id = review.product_id
+            await uow.reviews.delete_logical(review_id)
+            await self._refresh_product_rating(uow, product_id)
+            await uow.commit()
         return {"message": "Review deleted successfully"}
+
+    @staticmethod
+    async def _refresh_product_rating(uow: AbstractUnitOfWork, product_id: int) -> None:
+        """Пересчитать рейтинг товара по активным отзывам (в текущей транзакции)."""
+        average = await uow.reviews.get_average_grade(product_id)
+        await uow.products.set_rating(product_id, average)

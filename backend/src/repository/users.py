@@ -1,6 +1,5 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.models import UserModel
 from src.repository.base import BaseRepository
 
@@ -19,17 +18,7 @@ class UserRepository(BaseRepository[UserModel]):
         result = await self.db.scalars(
             select(self.model).where(
                 self.model.email == email,
-                self.model.is_active == True,
-            )
-        )
-        return result.first()
-
-    async def get_active_by_id(self, user_id: int) -> UserModel | None:
-        """Получить активного пользователя по ID."""
-        result = await self.db.scalars(
-            select(self.model).where(
-                self.model.id == user_id,
-                self.model.is_active == True,
+                self.model.is_active.is_(True),
             )
         )
         return result.first()

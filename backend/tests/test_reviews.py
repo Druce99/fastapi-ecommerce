@@ -1,6 +1,3 @@
-import pytest
-
-
 class TestGetReviews:
     async def test_get_all_reviews(self, client):
         resp = await client.get("/reviews/")
@@ -100,8 +97,12 @@ class TestDeleteReview:
 
         # Второй buyer пытается удалить
         email = f"buyer2_{uuid.uuid4().hex[:6]}@test.com"
-        await client.post("/users/", json={"email": email, "password": "pass123456", "role": "buyer"})
-        login = await client.post("/users/token", data={"username": email, "password": "pass123456"})
+        await client.post(
+            "/users/", json={"email": email, "password": "pass123456", "role": "buyer"}
+        )
+        login = await client.post(
+            "/users/token", data={"username": email, "password": "pass123456"}
+        )
         other_token = login.json()["access_token"]
 
         resp = await client.delete(

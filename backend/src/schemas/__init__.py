@@ -1,11 +1,19 @@
 from .auth import AccessTokenResponse, LoginRequest, RefreshTokenRequest, TokenResponse
-from .categories import Category as CategorySchema, CategoryCreate, CategoryTree
-from .products import Product as ProductSchema, ProductCreate, ProductList
-from .reviews import CreateReview, Review as ReviewSchema
-from .users import User as UserSchema, UserCreate, UserRoleUpdate
-from .CartItem import Cart as CartSchema, CartItem as CartItemSchema, CartItemCreate, CartItemUpdate
-from .orders import Order as OrderSchema, OrderList as OrderListSchema
-from .messages import OrderCreated as OrderCreatedSchema, UserRegistered as UserRegisteredSchema
+from .CartItem import Cart as CartSchema
+from .CartItem import CartItem as CartItemSchema
+from .CartItem import CartItemCreate, CartItemUpdate
+from .categories import Category as CategorySchema
+from .categories import CategoryCreate, CategoryTree
+from .messages import OrderCreated as OrderCreatedSchema
+from .messages import UserRegistered as UserRegisteredSchema
+from .orders import Order as OrderSchema
+from .orders import OrderList as OrderListSchema
+from .products import Product as ProductSchema
+from .products import ProductCreate, ProductList
+from .reviews import CreateReview
+from .reviews import Review as ReviewSchema
+from .users import User as UserSchema
+from .users import UserCreate, UserRoleUpdate
 
 __all__ = [
     "RefreshTokenRequest",

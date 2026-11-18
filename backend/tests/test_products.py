@@ -1,6 +1,3 @@
-import pytest
-
-
 class TestGetProducts:
     async def test_get_all_products(self, client):
         resp = await client.get("/products/")
@@ -59,7 +56,7 @@ class TestCreateProduct:
     async def test_seller_can_create(self, client, seller_token, category):
         resp = await client.post(
             "/products/",
-            json={
+            data={
                 "name": "New Product",
                 "description": "Some description",
                 "price": "49.99",
@@ -76,7 +73,7 @@ class TestCreateProduct:
     async def test_buyer_cannot_create(self, client, buyer_token, category):
         resp = await client.post(
             "/products/",
-            json={
+            data={
                 "name": "Buyer Product",
                 "description": "desc",
                 "price": "10.00",
@@ -90,7 +87,7 @@ class TestCreateProduct:
     async def test_invalid_category_fails(self, client, seller_token):
         resp = await client.post(
             "/products/",
-            json={
+            data={
                 "name": "Bad Product",
                 "description": "desc",
                 "price": "10.00",
@@ -104,7 +101,7 @@ class TestCreateProduct:
     async def test_unauthorized_cannot_create(self, client, category):
         resp = await client.post(
             "/products/",
-            json={
+            data={
                 "name": "No Auth Product",
                 "price": "10.00",
                 "stock": 1,
@@ -118,7 +115,7 @@ class TestUpdateProduct:
     async def test_seller_can_update_own_product(self, client, seller_token, product, category):
         resp = await client.put(
             f"/products/{product['id']}",
-            json={
+            data={
                 "name": "Updated Product",
                 "description": "Updated desc",
                 "price": "199.99",
@@ -132,15 +129,20 @@ class TestUpdateProduct:
 
     async def test_seller_cannot_update_others_product(self, client, category, product):
         import uuid
+
         # Второй продавец
         email = f"seller2_{uuid.uuid4().hex[:6]}@test.com"
-        await client.post("/users/", json={"email": email, "password": "pass123456", "role": "seller"})
-        login = await client.post("/users/token", data={"username": email, "password": "pass123456"})
+        await client.post(
+            "/users/", json={"email": email, "password": "pass123456", "role": "seller"}
+        )
+        login = await client.post(
+            "/users/token", data={"username": email, "password": "pass123456"}
+        )
         other_token = login.json()["access_token"]
 
         resp = await client.put(
             f"/products/{product['id']}",
-            json={
+            data={
                 "name": "Hacked",
                 "price": "1.00",
                 "stock": 0,
@@ -155,7 +157,7 @@ class TestDeleteProduct:
     async def test_seller_can_delete_own_product(self, client, seller_token, category):
         create = await client.post(
             "/products/",
-            json={
+            data={
                 "name": "To Delete",
                 "description": "desc",
                 "price": "10.00",
@@ -176,7 +178,7 @@ class TestDeleteProduct:
     async def test_deleted_product_not_found(self, client, seller_token, category):
         create = await client.post(
             "/products/",
-            json={
+            data={
                 "name": "Delete Me",
                 "description": "desc",
                 "price": "10.00",

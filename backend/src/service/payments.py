@@ -1,11 +1,50 @@
+from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any
-from uuid import uuid4
 
 from anyio import to_thread
+from src.core.config import settings
 from yookassa import Configuration, Payment
 
-from src.core.config import settings
+
+@dataclass(frozen=True)
+class PaymentInfo:
+    """Состояние платежа, полученное напрямую от ЮKassa (а не из тела уведомления)."""
+
+    id: str
+    status: str
+    amount: Decimal
+    currency: str
+    order_id: int | None
+
+
+def _configure_sdk() -> None:
+    """Глобальная настройка SDK (Basic Auth под капотом)."""
+    if not settings.YOOKASSA_SHOP_ID or not settings.YOOKASSA_SECRET_KEY:
+        raise RuntimeError("Задайте YOOKASSA_SHOP_ID и YOOKASSA_SECRET_KEY в .env")
+    Configuration.account_id = settings.YOOKASSA_SHOP_ID
+    Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
+
+
+async def fetch_yookassa_payment(payment_id: str) -> PaymentInfo:
+    """Запросить платёж у ЮKassa. Тело webhook не доверенное: правду говорит только API."""
+    _configure_sdk()
+    payment = await to_thread.run_sync(Payment.find_one, payment_id)
+
+    raw_order_id = (payment.metadata or {}).get("order_id")
+    try:
+        order_id = int(raw_order_id) if raw_order_id is not None else None
+    except (TypeError, ValueError):
+        order_id = None
+
+    return PaymentInfo(
+        id=payment.id,
+        status=payment.status,
+        amount=Decimal(str(payment.amount.value)),
+        currency=payment.amount.currency,
+        order_id=order_id,
+    )
+
 
 async def create_yookassa_payment(
     *,
@@ -14,15 +53,10 @@ async def create_yookassa_payment(
     user_email: str,
     description: str,
 ) -> dict[str, Any]:
-    
-    # 1. Проверка настроек (fallback на ошибку)
-    if not settings.YOOKASSA_SHOP_ID or not settings.YOOKASSA_SECRET_KEY:
-        raise RuntimeError("Задайте YOOKASSA_SHOP_ID и YOOKASSA_SECRET_KEY в .env")
-    
-    # 2. Глобальная настройка SDK (Basic Auth под капотом)
-    Configuration.account_id = settings.YOOKASSA_SHOP_ID
-    Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
-    
+
+    # 1-2. Проверка настроек и настройка SDK
+    _configure_sdk()
+
     # 3. ФОРМИРОВАНИЕ PAYLOAD
     # Это JSON для POST /v3/payments.
     payload = {
@@ -44,8 +78,8 @@ async def create_yookassa_payment(
                 "email": user_email,  # Чек придет на email
             },
             "items": [
-            # Список "товаров"/услуг (здесь 1 item = весь наш заказ)
-            #Но также мы можем передать и каждую позицию отдельно.
+                # Список "товаров"/услуг (здесь 1 item = весь наш заказ)
+                # Но также мы можем передать и каждую позицию отдельно.
                 {
                     "description": description[:128],  # Макс. 128 символов!
                     "quantity": "1.00",  # Кол-во (строка)
@@ -60,20 +94,20 @@ async def create_yookassa_payment(
             ],
         },
     }
-    
-    # 4. Вспомогательная синхронная функция для создания платежа
+
+    # 4. Вспомогательная синхронная функция для создания платежа.
+    # Ключ идемпотентности привязан к заказу: повторный вызов вернёт тот же платёж,
+    # а не создаст второй.
+    idempotence_key = f"order-{order_id}"
+
     def _request() -> Payment:
-        return Payment.create(payload, str(uuid4()))
-    
+        return Payment.create(payload, idempotence_key)
+
     # 5. Вызов в thread
     payment: Payment = await to_thread.run_sync(_request)
-    
-    #6. Извлечение URL для оплаты
+
+    # 6. Извлечение URL для оплаты
     confirmation_url = getattr(payment.confirmation, "confirmation_url", None)
-    
+
     # 7. Возврат данных для фронта/БД
-    return {
-        "id": payment.id,
-        "status": payment.status,
-        "confirmation_url":confirmation_url
-    }
+    return {"id": payment.id, "status": payment.status, "confirmation_url": confirmation_url}

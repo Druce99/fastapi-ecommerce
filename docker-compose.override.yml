@@ -1,0 +1,63 @@
+# Dev-окружение (подхватывается автоматически командой `docker compose ...`).
+# Порты привязаны к 127.0.0.1 — снаружи недоступны.
+
+x-dev-build: &dev-build
+  context: ./backend
+  target: dev
+
+x-dev-env: &dev-env
+  DB_HOST: db
+  DB_PORT: "5432"
+  REDIS_URL: redis://redis:6379
+  DEBUG: "true"
+
+x-dev-volumes: &dev-volumes
+  - ./backend/src:/app/src
+  - ./backend/tests:/app/tests
+  - ./backend/pyproject.toml:/app/pyproject.toml:ro
+
+services:
+  db:
+    ports:
+      - "127.0.0.1:5433:5432"  # 5433 снаружи, т.к. 5432 занят локальным PostgreSQL
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  migrate:
+    build: *dev-build
+    environment: *dev-env
+    volumes: *dev-volumes
+
+  app:
+    build: *dev-build
+    environment: *dev-env
+    volumes: *dev-volumes
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  # docker compose run --rm test
+  test:
+    profiles: ["test"]
+    build: *dev-build
+    environment: *dev-env
+    env_file: .env
+    volumes: *dev-volumes
+    command: ["pytest", "-v"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # docker compose run --rm lint
+  lint:
+    profiles: ["lint"]
+    build: *dev-build
+    environment: *dev-env
+    env_file: .env
+    volumes: *dev-volumes
+    command:
+      - sh
+      - -c
+      - ruff check . && ruff format --check . && mypy && bandit -q -r src -c pyproject.toml

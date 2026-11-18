@@ -3,8 +3,7 @@ from decimal import Decimal
 
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.models import ProductModel, ReviewModel
+from src.models import ProductModel
 from src.repository.base import BaseRepository
 
 
@@ -13,30 +12,31 @@ class ProductRepository(BaseRepository[ProductModel]):
         super().__init__(ProductModel, db)
 
     async def get_by_ids_for_update(self, product_ids: list[int]) -> list[ProductModel]:
+        """Блокирует товары (FOR UPDATE). Порядок по id одинаков для всех транзакций,
+        поэтому два заказа с пересекающимися товарами не создают взаимную блокировку."""
         result = await self.db.scalars(
             select(self.model)
             .where(self.model.id.in_(product_ids))
+            .order_by(self.model.id)
             .with_for_update()
         )
-        return result.all()
+        return list(result.all())
 
     async def get_by_category(self, category_id: int) -> list[ProductModel]:
         result = await self.db.scalars(
             select(self.model).where(
                 self.model.category_id == category_id,
-                self.model.is_active == True,
+                self.model.is_active.is_(True),
             )
         )
-        return result.all()
+        return list(result.all())
 
-    async def get_active_reviews(self, product_id: int) -> list[ReviewModel]:
-        result = await self.db.scalars(
-            select(ReviewModel).where(
-                ReviewModel.product_id == product_id,
-                ReviewModel.is_active == True,
-            )
-        )
-        return result.all()
+    async def set_rating(self, product_id: int, rating: Decimal) -> None:
+        """Записать пересчитанный рейтинг товара (без commit)."""
+        product = await self.get_by_id(product_id)
+        if product:
+            product.rating = rating
+            await self.db.flush()
 
     async def get_filtered(
         self,
@@ -74,9 +74,9 @@ class ProductRepository(BaseRepository[ProductModel]):
             filters.append(self.model.tsv.op("@@")(ts_query))
             rank_col = func.ts_rank_cd(self.model.tsv, ts_query).label("rank")
 
-        total = await self.db.scalar(
-            select(func.count()).select_from(self.model).where(*filters)
-        ) or 0
+        total = (
+            await self.db.scalar(select(func.count()).select_from(self.model).where(*filters)) or 0
+        )
 
         offset = (page - 1) * page_size
         if rank_col is not None:
@@ -97,6 +97,6 @@ class ProductRepository(BaseRepository[ProductModel]):
                 .offset(offset)
                 .limit(page_size)
             )
-            items = (await self.db.scalars(stmt)).all()
+            items = list((await self.db.scalars(stmt)).all())
 
         return items, total

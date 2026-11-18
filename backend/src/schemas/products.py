@@ -1,8 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
-from fastapi import Form
 
+from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -33,7 +33,7 @@ class ProductCreate(BaseModel):
         ...,
         description="ID категории, к которой относится товар",
     )
-    
+
     @classmethod
     def as_form(
         cls,
@@ -44,11 +44,7 @@ class ProductCreate(BaseModel):
         description: Annotated[str | None, Form()] = None,
     ) -> "ProductCreate":
         return cls(
-            name=name,
-            description=description,
-            price=price,
-            stock=stock,
-            category_id=category_id
+            name=name, description=description, price=price, stock=stock, category_id=category_id
         )
 
 
