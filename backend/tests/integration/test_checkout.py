@@ -6,7 +6,7 @@ import pytest
 from src.repository.uow import SqlAlchemyUnitOfWork
 from src.service.orders import OrderService
 
-from tests.conftest import session_maker_test
+from tests.integration.conftest import session_maker_test
 
 
 def _auth(token: str) -> dict[str, str]:

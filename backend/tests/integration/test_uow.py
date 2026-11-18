@@ -5,7 +5,7 @@ import uuid
 import pytest
 from src.repository.uow import SqlAlchemyUnitOfWork
 
-from tests.conftest import session_maker_test
+from tests.integration.conftest import session_maker_test
 
 
 def _email() -> str:
